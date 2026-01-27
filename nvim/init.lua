@@ -104,7 +104,10 @@ cmp.setup {
         end, { 'i', 's' }),
     }),
 }
--- treesitter
+vim.keymap.set("n","<Leader>e", vim.diagnostic.open_float, {desc = "Open Diagnostic Float"})
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic' })
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic' })
+vim.keymap.set("n", "<leader>gd", vim.lsp.buf.hover)
 require("nvim-treesitter.configs").setup({
     ensure_installed = {
         "bash", "c", "c_sharp", "cpp", "css", "csv", "dockerfile", "git_config", "gitcommit",
