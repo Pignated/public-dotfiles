@@ -1,5 +1,5 @@
 
-if os.getenv("USING_CPP") ~= "1" then
+if os.getenv("USING_C") ~= "1" then
     return
 end
 local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -8,5 +8,3 @@ vim.lsp.start({
     cmd = {'clangd'},
     
 })
-vim.keymap.set('n','<leader>e',vim.diagnostic.open_float, { desc = '[E]xpand diagnostic message' })
-

@@ -30,10 +30,10 @@ exec --no-startup-id dex --autostart --environment i3 --shmlog-size=26214400
 
 # screen before suspend. Use loginctl lock-session to lock your screen.
 exec --no-startup-id xset s 180 180
-exec --no-startup-id (pkill xss-lock && sleep 1 && xss-lock -- i3lock-fancy-rapid 10 2 -n)
+exec --no-startup-id xss-lock -l -- i3lock-fancy-rapid 2 pixel --nofork
 # Lock screen when hitting mod+l
 
-bindsym $mod+l exec i3lock-fancy-rapid 10 2
+bindsym $mod+l exec i3lock-fancy-rapid 10 pixel
 # Update/check if there are monitors that can be connected
 bindsym $mod+p exec --no-startup-id "autorandr --match-edid --skip-options crtc --load work || autorandr --match-edid --skip-options crtc --load mobile; ~/.fehbg"
 

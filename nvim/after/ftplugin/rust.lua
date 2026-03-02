@@ -1,21 +1,28 @@
-vim.keymap.set('n','<leader>e', function() 
-	vim.cmd.RustLsp('explainError')
-end)
-local bufnr = vim.api.nvim_get_current_buf()
-vim.keymap.set(
-  "n",
-  "<leader>a",
-  function()
-    vim.cmd.RustLsp('codeAction') -- supports rust-analyzer's grouping
-    -- or vim.lsp.buf.codeAction() if you don't want grouping.
-  end,
-  { silent = true, buffer = bufnr }
-)
-vim.keymap.set(
-  "n",
-  "K",  -- Override Neovim's built-in hover keymap with rustaceanvim's hover actions
-  function()
-    vim.cmd.RustLsp({'hover', 'actions'})
-  end,
-  { silent = true, buffer = bufnr }
-)
+if os.getenv("USING_RUST") ~= 1 then 
+    return
+end
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
+vim.lsp.config("rust-analyzer", {
+    name = "rust-anaylzer",
+    cmd = {'rust-analyzer'},
+    root_dir= vim.fs.root(0,{'Cargo.toml', '.git'}),
+    filetypes={'rs'},
+    capabilities = capabilities,
+
+    settings = {
+        ['rust-analyzer'] = {
+            cargo = {
+                allFeatures = true,
+                loadOutDirsFromCheck = true,
+                runBuildScripts = true,
+            },
+        }
+    }
+})
+vim.lsp.enable("rust-analyzer")
+local cmp = require('cmp')
+cmp.setup({
+    sources = {
+        {name='nvim_lsp'}
+    }
+})

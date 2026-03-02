@@ -21,9 +21,10 @@ require("lazy").setup({
         { "catppuccin/nvim",                 name = "catppuccin",                 priority = 1000},
         { "nvim-telescope/telescope.nvim",                   dependencies = { 'nvim-lua/plenary.nvim' } },
         { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
+        { "hrsh7th/vim-vsnip" },
         { "hrsh7th/cmp-nvim-lsp",            "hrsh7th/nvim-cmp",                  "hrsh7th/cmp-vsnip", },
+        { "neovim/nvim-lspconfig" },
         { "m4xshen/autoclose.nvim", },
-        { "williamboman/mason.nvim",         "williamboman/mason-lspconfig.nvim", "neovim/nvim-lspconfig" },
         { "nvim-lualine/lualine.nvim" },
         { "nvim-tree/nvim-tree.lua" },
         { "nvim-tree/nvim-web-devicons" },
@@ -35,10 +36,12 @@ require("lazy").setup({
                 "nvim-telescope/telescope.nvim", -- For picking b/w different remote methods
             },
             config = true,
-        }
+        },
+        { "norcalli/nvim-colorizer.lua",  }
     },
     checker = { enabled = true, notify = false },
 })
+
 vim.opt.number = true
 vim.cmd.colorscheme "catppuccin-mocha"
 vim.opt.expandtab = true
@@ -50,31 +53,17 @@ vim.lsp.config('*', {
 })
 require("autoclose").setup({
     options = {
-        disabled_filetypes = { "text", "latex", "texlab", "tex", "nix" },
+        disabled_filetypes = { "text", "latex", "texlab", "tex", "nix","markdown" },
         pair_spaces = true,
         auto_indent = true,
+
+    },
+    keys = {
+        ["\""] = {escape = false, close=false, pair="\"\""},
+        ["'"] = {escape = false, close=false, pair="''"}
     },
 })
 require("nvim-tree").setup()
--- mason / lsp setup
-require('mason').setup({
-    ui = {
-        icons = {
-            package_installed = "✓",
-            package_pending = "➜",
-            package_uninstalled = "✗"
-        }
-    }
-})
-
-require("mason-lspconfig").setup()
-vim.lsp.config('*', {
-    root_markers = { '.git' },
-})
-
-vim.lsp.enable("clangd")
-vim.lsp.enable("rust-analyzer")
-
 local cmp = require('cmp')
 cmp.setup {
     sources = {
@@ -104,10 +93,16 @@ cmp.setup {
         end, { 'i', 's' }),
     }),
 }
+require('colorizer').setup {
+    'css',
+    'javascript',
+    'html'
+}
 vim.keymap.set("n","<Leader>e", vim.diagnostic.open_float, {desc = "Open Diagnostic Float"})
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic' })
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic' })
 vim.keymap.set("n", "<leader>gd", vim.lsp.buf.hover)
+vim.keymap.set("n", "<leader>a", vim.lsp.buf.code_action)
 require("nvim-treesitter.configs").setup({
     ensure_installed = {
         "bash", "c", "c_sharp", "cpp", "css", "csv", "dockerfile", "git_config", "gitcommit",
@@ -185,4 +180,10 @@ vim.api.nvim_create_autocmd("VimEnter", {
         end
     end,
 })
-
+vim.api.nvim_create_autocmd("BufWritePre", {
+  group = vim.api.nvim_create_augroup("LspFormatting", {}),
+  callback = function()
+    vim.lsp.buf.format({ async = false })
+  end,
+})
+require("lsp_config")
