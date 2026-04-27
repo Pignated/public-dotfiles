@@ -1,12 +1,11 @@
-if os.getenv("USING_RUST") ~= 1 then 
+if os.getenv("USING_RUST") ~= "1" then 
     return
 end
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 vim.lsp.config("rust-analyzer", {
-    name = "rust-anaylzer",
+    name = "rust-analyzer",
     cmd = {'rust-analyzer'},
     root_dir= vim.fs.root(0,{'Cargo.toml', '.git'}),
-    filetypes={'rs'},
     capabilities = capabilities,
 
     settings = {

@@ -20,7 +20,7 @@ require("lazy").setup({
     spec = {
         { "catppuccin/nvim",                 name = "catppuccin",                 priority = 1000},
         { "nvim-telescope/telescope.nvim",                   dependencies = { 'nvim-lua/plenary.nvim' } },
-        { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
+        { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate", branch = "main" },
         { "hrsh7th/vim-vsnip" },
         { "hrsh7th/cmp-nvim-lsp",            "hrsh7th/nvim-cmp",                  "hrsh7th/cmp-vsnip", },
         { "neovim/nvim-lspconfig" },
@@ -28,7 +28,6 @@ require("lazy").setup({
         { "nvim-lualine/lualine.nvim" },
         { "nvim-tree/nvim-tree.lua" },
         { "nvim-tree/nvim-web-devicons" },
-        { "mrcjkb/rustaceanvim", version = "^6", lazy = false},
         { "amitds1997/remote-nvim.nvim", version = "*", -- Pin to GitHub releases
             dependencies = {
                 "nvim-lua/plenary.nvim", -- For standard functions
@@ -37,12 +36,13 @@ require("lazy").setup({
             },
             config = true,
         },
-        { "norcalli/nvim-colorizer.lua",  }
+        { "pignated/nvim-neocolorizer.lua",  }
     },
     checker = { enabled = true, notify = false },
 })
 
 vim.opt.number = true
+vim.opt.relativenumber = true
 vim.cmd.colorscheme "catppuccin-mocha"
 vim.opt.expandtab = true
 vim.opt.tabstop = 4
@@ -99,20 +99,22 @@ require('colorizer').setup {
     'html'
 }
 vim.keymap.set("n","<Leader>e", vim.diagnostic.open_float, {desc = "Open Diagnostic Float"})
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic' })
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next diagnostic' })
+vim.keymap.set('n', '[d', function() vim.diagnostic.jump({count = -1}) end, { desc = 'Go to previous diagnostic' })
+vim.keymap.set('n', ']d', function() vim.diagnostic.jump({count = 1}) end, { desc = 'Go to next diagnostic' })
 vim.keymap.set("n", "<leader>gd", vim.lsp.buf.hover)
 vim.keymap.set("n", "<leader>a", vim.lsp.buf.code_action)
-require("nvim-treesitter.configs").setup({
-    ensure_installed = {
-        "bash", "c", "c_sharp", "cpp", "css", "csv", "dockerfile", "git_config", "gitcommit",
-        "gitignore", "html", "http", "java", "javascript", "json", "lua", "markdown",
-        "nginx", "python", "robots", "sql", "ssh_config", "toml", "typescript", "vim", "xml",
-        "yaml", "kotlin", "asm", "nix", "rust"
-    },
-    sync_install = false,
-    highlight = { enable = true },
-    indent = { enable = true },
+treesitter_configs = require("nvim-treesitter")
+
+treesitter_configs.install = {
+    "bash", "c", "c_sharp", "cpp", "css", "csv", "dockerfile", "git_config", "gitcommit",
+    "gitignore", "html", "http", "java", "javascript", "json", "lua", "markdown",
+    "nginx", "python", "robots", "sql", "ssh_config", "toml", "typescript", "vim", "xml",
+    "yaml", "kotlin", "asm", "nix", "rust"
+}
+vim.api.nvim_create_autocmd("FileType" , {
+    callback = function()
+        pcall(vim.treesitter.start)
+    end,
 })
 
 -- lualine
@@ -173,15 +175,17 @@ require('lualine').setup {
     inactive_winbar = {},
     extensions = {},
 }
-vim.api.nvim_create_autocmd("VimEnter", {
+vim.api.nvim_create_autocmd("vimenter", {
     callback = function()
+        local has_telescope, builtin = pcall(require, "telescope.builtin")
+        if not has_telescope then return end
         if vim.fn.argv(0) == "" or vim.fn.argv(0) == "." then
-            vim.cmd("Telescope find_files hidden=true")
+            builtin.find_files({hidden = true})
         end
     end,
 })
-vim.api.nvim_create_autocmd("BufWritePre", {
-  group = vim.api.nvim_create_augroup("LspFormatting", {}),
+vim.api.nvim_create_autocmd("bufwritepre", {
+  group = vim.api.nvim_create_augroup("lspformatting", {}),
   callback = function()
     vim.lsp.buf.format({ async = false })
   end,
