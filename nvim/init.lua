@@ -190,4 +190,28 @@ vim.api.nvim_create_autocmd("bufwritepre", {
     vim.lsp.buf.format({ async = false })
   end,
 })
+local arrows_enabled=true
+local function toggle_arrows()
+    local modes = { 'n','i','v','x' }
+    local keys = {'<Up>','<Down>','<Left>','<Right>'}
+    if arrows_enabled then 
+        for _, mode in ipairs(modes) do
+            for _,key in ipairs(keys) do
+                vim.keymap.set(mode,key,'<Nop>',{noremap = true, silent=true})
+            end
+        end
+        print("Arrows disabled")
+        arrows_enabled = false
+    else
+        for _, mode in ipairs(modes) do
+            for _,key in ipairs(keys) do
+                pcall(vim.keymap.del,mode,key)
+            end
+        end
+        print("Arrows enabled")
+        arrows_enabled = true
+    end
+end
+vim.keymap.set("n","<Leader>ta", toggle_arrows, {desc = "Toggle Arrow Keys"})
+
 require("lsp_config")
